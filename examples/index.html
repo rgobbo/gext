@@ -1,0 +1,9 @@
+{% extends file="layout.html" %}
+
+{%block id="content"%}
+<h1> Index Block Content!!!</h1>
+<p>Date Golang : {{ Now }} </p>
+<p>To upper {{ "teste" | ToUpper }}</p>
+<p>FormatDate: {{ FormatDate TimeNow "DD/MM/YYYY hh:mm" }}</p>
+<p>Added function - Count letter "a" in word "California" : {{ Count "California" "a" }}</p>
+{%endblock%}
