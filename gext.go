@@ -6,8 +6,7 @@ import (
 	"os"
 	"path"
 	"sync"
-	"github.com/rgobbo/watchfy"
-
+	"github.com/rgobbo/fsmodify"
 	"fmt"
 	"strings"
 )
@@ -15,7 +14,7 @@ import (
 var (
 	cachedMutex sync.Mutex
     generalPathTemplates string
-    DefaultConfig = GextConfig{LeftDelimeter:"{{",RightDelimeter:"}}",PathTemplates:"./",WatchModify:true, LogModify:true}
+    DefaultConfig = GextConfig{LeftDelimeter:"{{",RightDelimeter:"}}",PathTemplates:"./",WatchInterval:0, LogModify:true}
 )
 
 
@@ -30,7 +29,7 @@ type GextConfig struct {
 	PathTemplates string
 	LeftDelimeter  string
 	RightDelimeter string
-	WatchModify bool
+	WatchInterval int
 	LogModify bool
 }
 
@@ -43,8 +42,8 @@ func NewGext(config GextConfig) *Gext {
 	generalPathTemplates = config.PathTemplates
 	gext := &Gext{cachedTemplates:make(map[string]*template.Template), Config:config, funcs:getFuncions()}
 
-	if config.WatchModify == true {
-		go watchfy.NewWatcher([]string{config.PathTemplates}, config.LogModify, func(filename string) {
+	if config.WatchInterval > 0 {
+		go fsmodify.NewWatcher(config.PathTemplates,"", config.WatchInterval,func(filename string) {
 			//base := path.Base(filename)
 			ext := path.Ext(filename)
 			if ext == ".html" {
@@ -52,6 +51,14 @@ func NewGext(config GextConfig) *Gext {
 				gext.ClearTemplateCache()
 			}
 		})
+		//go watchfy.NewWatcher([]string{config.PathTemplates}, config.LogModify, func(filename string) {
+		//	//base := path.Base(filename)
+		//	ext := path.Ext(filename)
+		//	if ext == ".html" {
+		//		//gext.TemplateRemove(base)
+		//		gext.ClearTemplateCache()
+		//	}
+		//})
 	}
 
 	return gext
