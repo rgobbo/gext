@@ -26,6 +26,7 @@ type page struct {
 	Controller   string
 	Methods      []string
 	Roles        []string
+	Security     string
 }
 
 func (p *page) Execute(wr io.Writer, data map[string]interface{}, req *http.Request) error {

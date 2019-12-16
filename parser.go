@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"strconv"
+	"strings"
 )
 
 var (
@@ -74,6 +75,30 @@ LoopBase:
 			} else {
 				bufRaw.WriteString(lit)
 			}
+		case sECURITY:
+			if isNew {
+				cp := p.parseSecurity()
+				page.Security = cp.description
+				isNew = false
+			} else {
+				bufRaw.WriteString(lit)
+			}
+		case mETHODS:
+			if isNew {
+				methods := p.parseMethods()
+				page.Methods = methods
+				isNew = false
+			} else {
+				bufRaw.WriteString(lit)
+			}
+		case rOLES:
+			if isNew {
+				roles := p.parseMethods()
+				page.Roles = roles
+				isNew = false
+			} else {
+				bufRaw.WriteString(lit)
+			}
 		case bLOCK:
 			if isNew {
 				cp := newBlock(p.parseParameters())
@@ -121,6 +146,20 @@ func (p *parser) parseInclude() component {
 	cp := newInclude(filename)
 	p.scanToEndCode()
 	return cp
+}
+
+func (p *parser) parseSecurity() *security {
+	description := p.parseQuotedStringWS()
+	cp := newSecurity(description)
+	p.scanToEndCode()
+	return cp
+}
+
+func (p *parser) parseMethods() []string {
+	pairs := p.parseQuotedStringWS()
+	ret := strings.Split(pairs, ",")
+	p.scanToEndCode()
+	return ret
 }
 
 func (p *parser) parseController() string {

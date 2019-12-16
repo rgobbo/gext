@@ -21,6 +21,7 @@ var (
 // Engine the goforms template engine
 type Gext struct {
 	cachedTemplates  map[string]*template.Template
+	cachedPages      map[string]*page
 	funcs map[string]interface{}
 	Config GextConfig
 }
@@ -40,7 +41,7 @@ func NewGext(config GextConfig) *Gext {
 		config.PathTemplates = config.PathTemplates + "/"
 	}
 	generalPathTemplates = config.PathTemplates
-	gext := &Gext{cachedTemplates:make(map[string]*template.Template), Config:config, funcs:getFuncions()}
+	gext := &Gext{cachedTemplates:make(map[string]*template.Template), cachedPages:make(map[string]*page), Config:config, funcs:getFuncions()}
 
 	if config.WatchInterval > 0 {
 		go fsmodify.NewWatcher(config.PathTemplates,"", config.WatchInterval,func(filename string) {
@@ -89,17 +90,23 @@ func (g *Gext) GetTemplate(name string) (*template.Template, error) {
 		return t, nil
 	}
 
-	p, err := getPage(name)
-	if err != nil {
-		return nil, err
+	pgNew := &page{}
+	if pg, ok := g.cachedPages[name]; ok {
+		pgNew = pg
+	} else {
+		p, err := getPage(name)
+		if err != nil {
+			return nil, err
+		}
+		pgNew = p
 	}
+
 
 
 	cachedMutex.Lock()
-	tmpl := template.Must(template.New(name).Delims(g.Config.LeftDelimeter, g.Config.RightDelimeter).Funcs(g.funcs).Parse(p.Render()))
-	if err != nil {
-		return nil, err
-	}
+	g.cachedPages[name] = pgNew
+	tmpl := template.Must(template.New(name).Delims(g.Config.LeftDelimeter, g.Config.RightDelimeter).Funcs(g.funcs).Parse(pgNew.Render()))
+
 	g.cachedTemplates[name] = tmpl
 	defer cachedMutex.Unlock()
 
@@ -108,12 +115,30 @@ func (g *Gext) GetTemplate(name string) (*template.Template, error) {
 }
 
 
+func (g *Gext) GetParsedPage(name string) (*page, error) {
+	if p, ok := g.cachedPages[name]; ok {
+		return p, nil
+	}
+
+	pg, err := getPage(name)
+	if err != nil {
+		return nil, err
+	}
+	cachedMutex.Lock()
+	g.cachedPages[name] = pg
+	defer cachedMutex.Unlock()
+
+	return pg, nil
+
+}
+
 //ClearTemplateCache - Clear cached templates
 func (g *Gext) ClearTemplateCache() {
 	cachedMutex.Lock()
 	defer cachedMutex.Unlock()
 	for k := range g.cachedTemplates {
 		delete(g.cachedTemplates, k)
+		delete(g.cachedPages, k)
 	}
 }
 
@@ -121,6 +146,7 @@ func (g *Gext) ClearTemplateCache() {
 func (g *Gext) TemplateRemove(name string) {
 	cachedMutex.Lock()
 	delete(g.cachedTemplates, name)
+	delete(g.cachedPages, name)
 	defer cachedMutex.Unlock()
 }
 

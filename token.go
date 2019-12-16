@@ -49,7 +49,8 @@ const (
 	tEXTMODE    //textmode
 	sECURITY    //security
 	eNDSECURITY //endsecurity
-	mETHOD      // method
+	mETHODS      // methods
+	rOLES        // roles
 
 
 

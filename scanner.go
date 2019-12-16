@@ -168,6 +168,10 @@ func (s *scanner) scanIdent() (tok token, lit string) {
 		return sECURITY, buf.String()
 	case "endsecurity":
 		return eNDSECURITY, buf.String()
+	case "methods":
+		return mETHODS, buf.String()
+	case "roles":
+		return rOLES, buf.String()
 	}
 
 	// Otherwise return as a regular identifier.
