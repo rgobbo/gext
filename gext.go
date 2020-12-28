@@ -1,37 +1,37 @@
 package gext
 
 import (
+	"fmt"
 	"html/template"
 	"io"
 	"os"
 	"path"
-	"sync"
-	"github.com/rgobbo/fsmodify"
-	"fmt"
 	"strings"
+	"sync"
+
+	"github.com/rgobbo/fsmodify"
 )
 
 var (
-	cachedMutex sync.Mutex
-    generalPathTemplates string
-    DefaultConfig = GextConfig{LeftDelimeter:"{{",RightDelimeter:"}}",PathTemplates:"./",WatchInterval:0, LogModify:true}
+	cachedMutex          sync.Mutex
+	generalPathTemplates string
+	DefaultConfig        = GextConfig{LeftDelimeter: "{{", RightDelimeter: "}}", PathTemplates: "./", WatchInterval: 0, LogModify: true}
 )
-
 
 // Engine the goforms template engine
 type Gext struct {
-	cachedTemplates  map[string]*template.Template
-	cachedPages      map[string]*page
-	funcs map[string]interface{}
-	Config GextConfig
+	cachedTemplates map[string]*template.Template
+	cachedPages     map[string]*page
+	funcs           map[string]interface{}
+	Config          GextConfig
 }
 
 type GextConfig struct {
-	PathTemplates string
+	PathTemplates  string
 	LeftDelimeter  string
 	RightDelimeter string
-	WatchInterval int
-	LogModify bool
+	WatchInterval  int
+	LogModify      bool
 }
 
 // New creates and returns a new template engine
@@ -41,10 +41,10 @@ func NewGext(config GextConfig) *Gext {
 		config.PathTemplates = config.PathTemplates + "/"
 	}
 	generalPathTemplates = config.PathTemplates
-	gext := &Gext{cachedTemplates:make(map[string]*template.Template), cachedPages:make(map[string]*page), Config:config, funcs:getFuncions()}
+	gext := &Gext{cachedTemplates: make(map[string]*template.Template), cachedPages: make(map[string]*page), Config: config, funcs: getFuncions()}
 
 	if config.WatchInterval > 0 {
-		go fsmodify.NewWatcher(config.PathTemplates,"", config.WatchInterval,func(filename string) {
+		go fsmodify.NewWatcher(config.PathTemplates, "", config.WatchInterval, func(filename string) {
 			//base := path.Base(filename)
 			ext := path.Ext(filename)
 			if ext == ".html" {
@@ -65,20 +65,19 @@ func NewGext(config GextConfig) *Gext {
 	return gext
 }
 
-
-func (g *Gext) Render(w io.Writer, name string, data interface{} ) error {
+func (g *Gext) Render(w io.Writer, name string, data interface{}) error {
 
 	t, err := g.GetTemplate(name)
 	if err != nil {
-		return fmt.Errorf("[NOT FOUND] Template with name %s doesn't exists in the dir :%s", name, g.Config.PathTemplates)
+		return fmt.Errorf("[ERROR] Template with name %s dir :%s , error:", name, g.Config.PathTemplates, err.Error())
 	}
 
 	return t.ExecuteTemplate(w, name, data)
 
 }
 
-func (g *Gext)AddFuncs(funcs map[string]interface{}) {
-	for s,f := range funcs {
+func (g *Gext) AddFuncs(funcs map[string]interface{}) {
+	for s, f := range funcs {
 		g.funcs[s] = f
 	}
 }
@@ -101,19 +100,19 @@ func (g *Gext) GetTemplate(name string) (*template.Template, error) {
 		pgNew = p
 	}
 
-
-
 	cachedMutex.Lock()
-	g.cachedPages[name] = pgNew
-	tmpl := template.Must(template.New(name).Delims(g.Config.LeftDelimeter, g.Config.RightDelimeter).Funcs(g.funcs).Parse(pgNew.Render()))
-
-	g.cachedTemplates[name] = tmpl
 	defer cachedMutex.Unlock()
+
+	tmpl, err := template.New(name).Delims(g.Config.LeftDelimeter, g.Config.RightDelimeter).Funcs(g.funcs).Parse(pgNew.Render())
+	if err != nil {
+		return nil, err
+	}
+	g.cachedPages[name] = pgNew
+	g.cachedTemplates[name] = tmpl
 
 	return tmpl, nil
 
 }
-
 
 func (g *Gext) GetParsedPage(name string) (*page, error) {
 	if p, ok := g.cachedPages[name]; ok {
@@ -150,11 +149,9 @@ func (g *Gext) TemplateRemove(name string) {
 	defer cachedMutex.Unlock()
 }
 
-
-
 func getPage(name string) (*page, error) {
 
-	file, err := os.Open( generalPathTemplates + name)
+	file, err := os.Open(generalPathTemplates + name)
 	if err != nil {
 		return nil, err
 	}
