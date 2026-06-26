@@ -1,0 +1,8 @@
+github.com/gorilla/mux v1.8.1 h1:TuBL49tXwgrFYWhqrNgrUNEY92u81SPhu7sTdzQEiWY=
+github.com/gorilla/mux v1.8.1/go.mod h1:AKf9I4AEqPTmMytcMc0KkNouC66V3BtZ4qD5fmWSiMQ=
+github.com/rgobbo/fsmodify v0.0.0-20180925220218-5d8d70f6d9c1 h1:J/Rr5fHI1UC66Yyk4HhbbPA+6t1wYWN7hLqj6jX8SUY=
+github.com/rgobbo/fsmodify v0.0.0-20180925220218-5d8d70f6d9c1/go.mod h1:hxmPSWdN55C8r+ldFgEsBNebi1LcY3nstBEn8pxiYpY=
+gitlab.com/metakeule/fmtdate v1.2.2 h1:ce0Qnwo6PAONi6xwPr4YxdxAFIKqNfoMbHG4c49vIjk=
+gitlab.com/metakeule/fmtdate v1.2.2/go.mod h1:uZUf21xepWGLp6PgJGBbHeBVWO+/gsKi3Gdh0Fu4lGg=
+golang.org/x/net v0.56.0 h1:Rw8j/hFzGvJUZwNBXnAtf5sVDVt+65SK2C7IxCxZt5o=
+golang.org/x/net v0.56.0/go.mod h1:D3Ku6r+V6JROoZK144D2XfMHFcMq/0zSfLelVTCFKec=

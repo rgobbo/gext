@@ -2,18 +2,19 @@ package gext
 
 import (
 	"html/template"
-	"time"
 	"strings"
-	"github.com/metakeule/fmtdate"
+	"time"
+
+	"gitlab.com/metakeule/fmtdate"
 )
 
-func getFuncions() map[string]interface{}{
+func getFuncions() map[string]interface{} {
 	return template.FuncMap{
-		"Now": now,
-		"ToUpper" : strings.ToUpper,
-		"ToLower" : strings.ToLower,
-		"TimeNow" : timeNow,
-		"FormatDate" : formatDate,
+		"Now":        now,
+		"ToUpper":    strings.ToUpper,
+		"ToLower":    strings.ToLower,
+		"TimeNow":    timeNow,
+		"FormatDate": formatDate,
 	}
 }
 
@@ -26,5 +27,5 @@ func timeNow() time.Time {
 }
 
 func formatDate(date time.Time, format string) string {
-	return fmtdate.Format(format,date)
+	return fmtdate.Format(format, date)
 }
